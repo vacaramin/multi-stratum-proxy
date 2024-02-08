@@ -1,1 +1,1 @@
-package beamstratum
+package scryptstratum

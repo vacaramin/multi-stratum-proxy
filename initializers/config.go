@@ -8,28 +8,30 @@ import (
 )
 
 type Fee struct {
-	Window               string
-	Percent              int
-	Extranonce_subscribe bool
-	Pool                 string
-	Worker               string
-	Pass                 string
+	Window               int    `json:"window"`
+	Percent              int    `json:"percent"`
+	Extranonce_subscribe bool   `json:"extranonce_subscribe"`
+	Pool                 string `json:"pool"`
+	Worker               string `json:"worker"`
+	Pass                 string `json:"pass"`
 }
 
-type Protocols struct {
-	Protocol string
-	Fee      Fee
+type Protocol struct {
+	Pools map[string]string `json:"pools"`
+	Fee   Fee               `json:"fee"`
 }
+
+type Protocols map[string]map[string]Protocol
 
 type Event struct {
-	Host string
-	Port int
+	Host string `json:"host"`
+	Port int    `json:"port"`
 }
 
 type Config struct {
-	Host      string
-	Protocols map[string]Protocols
-	Event     Event
+	Host      string                         `json:"host"`
+	Protocols map[string]map[string]Protocol `json:"protocols"`
+	Event     Event                          `json:"event"`
 }
 
 // ImportConfig : Unmarshal the config file using file name or path into the Config struct and return

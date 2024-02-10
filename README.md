@@ -9,3 +9,5 @@ The multi-stratum-proxy project serves as a bidirectional proxy for handling min
 - Communication with multiple mining pools simultaneously.
 - Splitting of miner hashrates among different pools.
 - Parallel processing to increase overall hashrate efficiency.
+## Understanding 
+[Draw.io Diagram to Understand the workflows involved in stratum proxy](https://app.diagrams.net/#G1uNhJoR9OOZRVciaOkG5VDUhAv4hF3WBW)

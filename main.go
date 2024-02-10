@@ -6,10 +6,10 @@ import (
 )
 
 func main() {
-	config, err := initializers.ImportConfig("config_19.json")
+	/*config*/ _, err := initializers.ImportConfig("config_19.json")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
-	initializers.PrintConfig(*config)
+	//initializers.PrintConfig(*config)
 }

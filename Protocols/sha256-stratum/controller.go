@@ -12,15 +12,6 @@ TO DO
 	Creates separate stratum proxy servers for each configured pool.
 	Keeps track of connected miners and handles events like disconnections.
 */
-type Controller struct {
-	Coin        string
-	Host        string
-	Params      map[string]interface{}
-	LogPrefix   string
-	MinersCount int
-	Ports       map[string]string
-	Miners      map[string]map[int]*Miner
-}
 
 // module.exports = class Controller {
 //     constructor(coin, host, params) {
@@ -33,7 +24,16 @@ type Controller struct {
 //         this.ports = {}
 //         this.miners = new Map()
 
-//     }
+// }
+type Controller struct {
+	Coin        string
+	Host        string
+	Params      map[string]interface{}
+	LogPrefix   string
+	MinersCount int
+	Ports       map[string]string
+	Miners      map[string]map[int]*Miner
+}
 
 //     init() {
 //         Object.keys(this.params.pools).forEach(port => {

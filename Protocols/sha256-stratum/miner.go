@@ -1,7 +1,9 @@
 package sha256stratum
 
 import (
+	"log"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -30,6 +32,28 @@ type Miner struct {
 	LogPrefix    string
 	Jobs         []map[string]interface{}
 	Fee          Fee
+}
+
+func NewMiner(controller Controller, conn net.Conn, port string, miningServer string) *Miner {
+	controller.MinersCount++
+	log_prefix := controller.LogPrefix + " MINER:" + strconv.Itoa(controller.MinersCount-1) + " >"
+	log.Printf("Miner Connecting (IP: %v ) ...", conn.RemoteAddr().String())
+
+	return &Miner{
+		ID:           controller.MinersCount - 1,
+		Controller:   &controller,
+		Socket:       conn,
+		Port:         port,
+		MiningServer: miningServer,
+		LogPrefix:    log_prefix,
+		Fee: Fee{
+			Pool:     PoolToFee{},
+			Active:   false,
+			Interval: nil,
+			Timeout:  nil,
+			Jobs:     []map[string]string{},
+		},
+	}
 }
 
 func (m *Miner) ConnectToPool() {

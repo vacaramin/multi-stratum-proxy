@@ -22,8 +22,8 @@ type Controller struct {
 	Miners      map[string]map[int]*Miner
 }
 
-func NewController(coin string, host string, params map[string]interface{}) Controller {
-	return Controller{
+func NewController(coin string, host string, params map[string]interface{}) *Controller {
+	return &Controller{
 		Coin:        coin,
 		Host:        host,
 		Params:      params,

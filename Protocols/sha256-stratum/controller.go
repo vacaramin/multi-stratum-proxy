@@ -6,38 +6,19 @@ import (
 	"strings"
 )
 
-// const net = require('net')
-// const Miner = require('./miner')
-// const logger = require('../../lib/logger')
-// const config = require("../../config");
+type PortDetail struct {
+	Pool   interface{}
+	Miners map[int]*Miner
+	Server net.Listener
+}
 
-/*
-TO DO
-
-	Defines the Controller class which manages multiple miners and connections to various pools.
-	Creates separate stratum proxy servers for each configured pool.
-	Keeps track of connected miners and handles events like disconnections.
-*/
-
-// module.exports = class Controller {
-//     constructor(coin, host, params) {
-//         this.coin = coin
-//         this.host = host
-//         this.params = params
-//         this.logPrefix = coin.toUpperCase() + ' >'
-
-//         this.minersCount = 0
-//         this.ports = {}
-//         this.miners = new Map()
-
-// }
 type Controller struct {
 	Coin        string
 	Host        string
 	Params      map[string]interface{}
 	LogPrefix   string
 	MinersCount int
-	Ports       map[string]interface{}
+	Ports       map[string]PortDetail
 	Miners      map[string]map[int]*Miner
 }
 
@@ -48,7 +29,7 @@ func NewController(coin string, host string, params map[string]interface{}) Cont
 		Params:      params,
 		LogPrefix:   strings.ToUpper(coin) + " >",
 		MinersCount: 0,
-		Ports:       make(map[string]interface{}),
+		Ports:       make(map[string]PortDetail),
 		Miners:      make(map[string]map[int]*Miner),
 	}
 }
@@ -67,93 +48,28 @@ func (c *Controller) CreateStratumProxy(port string, pool interface{}) {
 	}
 
 	// Create a new map entry for the port
-	c.Ports[port] = struct {
-		Pool   interface{}
-		Miners map[int]*Miner
-		Server net.Listener
-	}{
+	c.Ports[port] = PortDetail{
 		Pool:   pool,
 		Miners: make(map[int]*Miner),
 		Server: server,
 	}
 
-	// Start accepting connections
-	// go func() {
-	// 	for {
-	// 		// Accept a new connection
-	// 		conn, err := server.Accept()
-	// 		if err != nil {
-	// 			// Handle error
-	// 			continue
-	// 		}
-
-	// 		// Handle the connection in a new goroutine
-	// 		go func(conn net.Conn) {
-	// 			// Create a new Miner instance
-	// 			miner := NewMiner(c, conn, port, pool)
-
-	// 			// Connect to the pool
-	// 			miner.ConnectToPool()
-
-	// 			// Set fee (assuming fee is part of Controller's fields)
-	// 			feeWindow := c.Params["fee"].(map[string]interface{})["window"].(int)
-	// 			feePercent := c.Params["fee"].(map[string]interface{})["percent"].(float64)
-	// 			miner.SetFee(feeWindow, feePercent)
-
-	// 			// Add the miner to the map of miners for this port
-	// 			c.Ports[port].Miners[miner.ID] = miner
-	// 		}(conn)
-	// 	}
-	// }()
-
-	// // Log that the Stratum proxy has started
-	// fmt.Printf("Stratum proxy started (port: %s, pool: %v)\n", port, pool)
+	fmt.Printf("Stratum proxy started (port: %s, pool: %v)\n", port, pool)
 }
 
-//     init() {
-//         Object.keys(this.params.pools).forEach(port => {
-//             this.createStratumProxy(port, this.params.pools[port])
-//         })
-//     }
+func (c *Controller) DeleteMiner(port string, id int) {
+	delete(c.Miners[port], id)
+}
 
-//     createStratumProxy(port, pool) {
-//         this.ports[port] = {
-//             pool,
-//             miners: new Map()
-//         }
-//         this.ports[port].server = net.createServer(socket => {
-//             const miner = new Miner(this, socket, port, pool)
-//             miner.connectToPool()
-//             miner.setFee(this.params.fee.window, this.params.fee.percent)
-//             this.ports[port].miners.set(miner.id, miner)
-//         })
-//         this.ports[port].server.listen(port, this.host, () => {
-//             logger.info(this.logPrefix, `Stratum proxy started (port: ${port}, pool: ${pool})`)
-//         })
-//     }
+func (c *Controller) ClosePort(port string) {
+	if _, ok := c.Ports[port]; ok {
+		c.Ports[port].Server.Close()
+		delete(c.Ports, port)
+	}
+}
 
-//     /*
-//     Close connection with ID connection(miner)
-//      */
-//     deleteMiner(port, id) {
-//         this.ports[port].miners.delete(id)
-//     }
-
-//     /*
-//     Close listening port
-//      */
-//     closePort(port) {
-//         logger.info(this.logPrefix, `Сlose (port: ${port}, pool: ${this.ports[port].pool})`)
-//         this.ports[port].server.close()
-//         this.ports[port].miners.forEach(miner => miner.socket.destroy())
-//         delete this.ports[port]
-//     }
-
-//     close() {
-//         Object.keys(this.ports).forEach(port => {
-//             logger.info(this.logPrefix, `Сlose (port: ${port}, pool: ${this.ports[port].pool})`)
-//             this.ports[port].server.close()
-//             this.ports[port].miners.forEach(miner => miner.socket.destroy())
-//         })
-//     }
-// }
+func (c *Controller) Close() {
+	for port := range c.Ports {
+		c.ClosePort(port)
+	}
+}
